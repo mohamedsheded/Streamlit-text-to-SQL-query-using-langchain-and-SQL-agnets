@@ -7,7 +7,7 @@ This application allows users to interact with a SQL database using natural lang
 ## Features
 
 - **Natural Language to SQL Query Conversion:** Allows users to query databases using plain English.
-- **Multiple Database Support:** Works with LOCALDB and YOURDB just provide the host, user, password , db_name.
+- **Multiple Database Support:** Works with SQLite and MySQL.
 - **Streamlit-Based Web UI:** Provides an intuitive chat interface.
 - **Groq LLM Integration:** Utilizes the Llama3-8b-8192 model for natural language processing.
 - **Session-Based Chat History:** Retains previous queries and responses.
@@ -26,17 +26,20 @@ This application allows users to interact with a SQL database using natural lang
 ## Installation
 
 1. **Clone the Repository:**
+
 ```bash
 $ git clone <repository-url>
 $ cd <repository-folder>
 ```
 
 2. **Install Dependencies:**
+
 ```bash
 $ pip install -r requirements.txt
 ```
 
 3. **Set Up the Database:**
+
 - For SQLite, place your `student.db` file in the root directory.
 - For MySQL, ensure the database is accessible and note down the credentials.
 
@@ -45,15 +48,18 @@ $ pip install -r requirements.txt
 ## Configuration
 
 1. Start the Streamlit application:
+
 ```bash
 $ streamlit run app.py
 ```
 
 2. Choose a database option in the sidebar:
+
    - SQLite (default)
    - MySQL
 
 3. For MySQL, provide:
+
    - Host
    - Username
    - Password
@@ -76,6 +82,7 @@ $ streamlit run app.py
 ## Code Explanation
 
 ### 1. Import Libraries
+
 ```python
 import streamlit as st
 from pathlib import Path
@@ -88,6 +95,7 @@ from sqlalchemy import create_engine
 import sqlite3
 from langchain_groq import ChatGroq
 ```
+
 - **streamlit**: Creates the web interface.
 - **langchain**: Provides tools for building SQL agents.
 - **sqlalchemy**: Handles database connections.
@@ -95,34 +103,43 @@ from langchain_groq import ChatGroq
 - **ChatGroq**: Integrates the Groq LLM model.
 
 ### 2. Configure the Application
+
 ```python
 st.set_page_config(page_title="LangChain: Chat with SQL DB", page_icon="🦜")
 st.title("🦜 LangChain: Chat with SQL DB")
 ```
+
 - Sets up the page title and icon.
 
 ### 3. Sidebar for Input
+
 ```python
 radio_opt=["Use SQLLite 3 Database- Student.db","Connect to you MySQL Database"]
 selected_opt=st.sidebar.radio(label="Choose the DB which you want to chat",options=radio_opt)
 ```
+
 - Allows users to select the database type (SQLite or MySQL).
 
 ### 4. API Key Input
+
 ```python
 api_key=st.sidebar.text_input(label="GRoq API Key",type="password")
 ```
+
 - Takes the Groq API key for accessing the LLM model.
 
 ### 5. Configure Database Connection
+
 ```python
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri,mysql_host=None,mysql_user=None,mysql_password=None,mysql_db=None):
 ```
+
 - Caches database configuration to reduce reload times.
 - Supports SQLite and MySQL connections.
 
 ### 6. Create SQL Agent
+
 ```python
 agent=create_sql_agent(
     llm=llm,
@@ -131,14 +148,17 @@ agent=create_sql_agent(
     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION
 )
 ```
+
 - Configures a SQL agent using the Groq LLM model.
 - Uses zero-shot learning for query generation.
 
 ### 7. Chat Interface
+
 ```python
 if "messages" not in st.session_state or st.sidebar.button("Clear message history"):
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 ```
+
 - Maintains chat history across sessions.
 
 ```python
@@ -154,7 +174,31 @@ if user_query:
         st.session_state.messages.append({"role":"assistant","content":response})
         st.write(response)
 ```
+
 - Handles user queries and displays responses from the LLM model.
+
+---
+
+## Database Setup Example
+
+The following example creates and populates a SQLite database:
+
+```python
+import sqlite3
+connection=sqlite3.connect("student.db")
+cursor=connection.cursor()
+
+# Create table
+cursor.execute("""
+create table STUDENT(NAME VARCHAR(25),CLASS VARCHAR(25),SECTION VARCHAR(25),MARKS INT)
+""")
+
+# Insert records
+cursor.execute('''Insert Into STUDENT values('Krish','Data Science','A',90)''')
+cursor.execute('''Insert Into STUDENT values('John','Data Science','B',100)''')
+connection.commit()
+connection.close()
+```
 
 ---
 
@@ -179,5 +223,6 @@ langchain-groq
 - Extend functionality by adding more LLM models or databases as needed.
 
 ---
+
 
 
