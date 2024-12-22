@@ -212,6 +212,7 @@ langchain
 sqlalchemy
 sqlite3
 langchain-groq
+mysql-connector-python
 ```
 
 ---
